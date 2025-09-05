@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+      http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+      http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd">
+
+      <!-- 1. 빈등록 -->
+      <context:component-scan
+              base-package="com.spring.project" />
+      <mvc:annotation-driven />
+      <!-- 2. AOP자동 스캔 + AOP 어노테이션 -->
+      <aop:aspectj-autoproxy />
+
+
+      <!-- 3. properties읽어올 위치지정 , classpath: src/main/resources-->
+      <context:property-placeholder  location="classpath:config/database.properties"/>
+
+      <!-- 4. DataSource를 생성한다
+         destroy-method="close":  Spring 컨텍스트가 종료될때 자동 실행 close처리
+            - 방법1) org.apache.tomcat.jdbc.pool.DataSource
+            - 방법2) org.apache.commons.dbcp2.BasicDataSource
+       -->
+
+      <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+            <property name="maxUploadSize" value="10485760"/> <!-- 10MB -->
+      </bean>
+      <bean id="dataSource"  class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close" >
+            <property name="driverClassName"  value="${jdbc.driver}"  />
+            <property name="url"            value="${jdbc.url}"/>
+            <property name="username"         value="${jdbc.username}" />
+            <property name="password"         value="${jdbc.password}" />
+      </bean>
+
+      <!-- JdbcTemplate -->
+      <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+            <property name="dataSource" ref="dataSource"/>
+      </bean>
+
+      <!-- Mybatis -->
+      <bean id="sqlSession" class="org.mybatis.spring.SqlSessionFactoryBean">
+            <property name="dataSource" ref="dataSource" />
+            <property name="configLocation" value="classpath:mapper/sql-map-config.xml" />
+      </bean>
+      <bean  class="org.mybatis.spring.SqlSessionTemplate">
+            <constructor-arg ref="sqlSession" />
+      </bean>
+
+      <!--5. Transaction 관리자(커밋,롤백)설정
+         . DB와 dataSource연동
+         . TransactionManager생성
+            - JDBC기반 트랜잭션을 자동으로 관리해주는 역할을 한다   - commit(), rollback() 등
+      -->
+      <!--<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+            <property name="dataSource" ref="dataSource"></property>
+      </bean>
+      <tx:advice id="txAdvice" transaction-manager="txManager"> &lt;!&ndash; txAdvice라는 어드바이스가  txManager를 이용해서 트랜잭션을 관리하도록 설정 &ndash;&gt;
+            <tx:attributes>
+                  <tx:method name="get*" read-only="true"/>  &lt;!&ndash; 트랜잭션을 적용할 메소드 : get으로 시작하는 모든 메소드는 읽기전용으로 처리해서 트랜잭션대상에서 제외 &ndash;&gt;
+                  <tx:method name="*"    rollback-for="java.lang.Exception" />  &lt;!&ndash; 트랜잭션을 적용할 메소드 : 나머지 메소드들은 트랜잭션관리에 포함 &ndash;&gt;
+            </tx:attributes>
+      </tx:advice>
+
+      &lt;!&ndash; 7. 트랜잭션 적용설정 &ndash;&gt;
+      <aop:config>
+            <aop:pointcut id="txPointcut" expression="execution(* com.spring.biz..*.*(..))"/>
+            <aop:advisor  pointcut-ref="txPointcut" advice-ref="txAdvice"/>
+      </aop:config>-->
+
+
+      <!-- 이메일 발송 설정 -->
+      <!-- ... 기존 코드 ... -->
+
+      <!-- JavaMailSender(Gmail) 등록 -->
+      <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+            <property name="host" value="smtp.gmail.com"/>
+            <property name="port" value="587"/>
+            <property name="username" value="kjm02251@gmail.com"/>
+            <property name="password" value="zepjyxrwzizvgfer"/>
+            <property name="javaMailProperties">
+                  <props>
+                        <prop key="mail.transport.protocol">smtp</prop>
+                        <prop key="mail.smtp.auth">true</prop>
+                        <prop key="mail.smtp.starttls.enable">true</prop>
+                        <prop key="mail.debug">true</prop>
+                  </props>
+            </property>
+      </bean>
+
+      <!-- JavaMailSender(Naver) 등록 -->
+      <bean id="naverSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+            <property name="host" value="smtp.naver.com"/>
+            <property name="port" value="587"/>
+            <property name="username" value="kjm000225@naver.com"/>
+            <property name="password" value="kjm3164829!"/>
+            <property name="javaMailProperties">
+                  <props>
+                        <prop key="mail.transport.protocol">smtp</prop>
+                        <prop key="mail.smtp.auth">true</prop>
+                        <prop key="mail.smtp.starttls.enable">true</prop>
+                        <prop key="mail.debug">true</prop>
+                  </props>
+            </property>
+      </bean>
+
+
+
+</beans>

@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+
+	<!-- Maven 프로젝트의 POM(Project Object Model) 파일이 따르는 XML 모델의 버전을 지정하는 태그 -->
+	<modelVersion>4.0.0</modelVersion>
+
+
+	<groupId>com.spring.biz</groupId>
+	<artifactId>NAFAL</artifactId>
+	<name>nafal</name>
+	<packaging>war</packaging>
+	<version>1.0.0-BUILD-SNAPSHOT</version>
+
+
+
+
+	<!-- properties: 프로젝트의 설정 값을 관리하는 역할 -->
+	<properties>
+		<java-version>11</java-version>
+
+		<!-- 스프링프레임워크 최신버전으로 변경 -->
+		<org.springframework-version>5.2.9.RELEASE</org.springframework-version>
+		<org.aspectj-version>1.9.6</org.aspectj-version>
+		<org.slf4j-version>1.7.36</org.slf4j-version>
+	</properties>
+
+
+	<!-- dependency: 외부 라이브러리와의 의존성을 관리하는 역할. 필요한 라이브러리를 자동으로 다운로드하고 설정지원 -->
+	<dependencies>
+		<!-- Spring Security OAuth2 로그인 -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-client</artifactId>
+			<version>5.2.9.RELEASE</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-core</artifactId>
+			<version>5.2.9.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+			<version>5.2.9.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>5.2.9.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-jose</artifactId>
+			<version>5.2.9.RELEASE</version>
+		</dependency>
+
+		<!-- Spring -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${org.springframework-version}</version>
+			<exclusions>
+				<!-- Exclude Commons Logging in favor of SLF4j -->
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${org.springframework-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${org.springframework-version}</version>
+		</dependency>
+		<!-- AspectJ -->
+		<!--
+		  AspectJ
+		      - AOP(Aspect-Oriented Programming, 관점 지향 프로그래밍)을 지원하는 프레임워크
+		      - 기존 코드에 영향을 주지 않고 공통 기능을 모듈화할 수 있도록 지원
+		 -->
+
+
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+			<version>${org.aspectj-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>${org.aspectj-version}</version>
+		</dependency>
+
+
+		<!-- Mybatis라이브러리 추가 -->
+
+		<!-- Mybatis : MyBatis 자체의 핵심 기능(SQL 매핑, 실행, ResultMap 등)을 제공하는 라이브러리-->
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+			<version>3.5.7</version>  <!-- 3.3.1   3.5.7 -->
+		</dependency>
+
+		<!-- Mybatis Spring: MyBatis를 Spring 프레임워크와 연결해주는 어댑터 역할 -->
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis-spring</artifactId>
+			<version>2.0.6</version>   <!--  1.2.4   2.0.6 -->
+		</dependency>
+
+
+		<!-- 이메일 인증 API -->
+		<!-- Spring Email (JavaMailSender) -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>5.3.30</version> <!-- 프로젝트 Spring 버전에 맞게 조정 -->
+		</dependency>
+
+		<!-- JavaMail (Jakarta Mail) -->
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>jakarta.mail</artifactId>
+			<version>1.6.7</version>
+		</dependency>
+
+
+		<!--
+			SLF4J(Simple Logging Facade for Java)의 핵심 인터페이스를 제공하는 라이브러리
+			    - 다양한 로깅 프레임워크(Logback, Log4j 2, java.util.logging 등)를 추상화하여 통합적으로 사용지원다.
+				주요 역할
+				- 로깅 인터페이스 제공
+				- 유연한 로깅 구현 선택 가능
+				- 라이브러리 간 충돌 방지
+				- 플레이스홀더 기반 로깅 지원
+		-->
+
+
+		<!--<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${org.slf4j-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>${org.slf4j-version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${org.slf4j-version}</version>
+			<scope>runtime</scope>
+		</dependency>-->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.2.11</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.mail</groupId>
+					<artifactId>mail</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.jms</groupId>
+					<artifactId>jms</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.sun.jdmk</groupId>
+					<artifactId>jmxtools</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.sun.jmx</groupId>
+					<artifactId>jmxri</artifactId>
+				</exclusion>
+			</exclusions>
+			<scope>runtime</scope>
+		</dependency>
+
+		<!--
+			Lombok추가
+			   - Lombok은 Java 코드의 반복적인 보일러플레이트(boilerplate) 코드를 줄여주는 라이브러리
+			    . 자동 Getter/Setter 생성 (@Getter, @Setter)
+				. 생성자 자동 생성 (@NoArgsConstructor, @AllArgsConstructor, @RequiredArgsConstructor)				- toString(), equals(), hashCode() 자동 생성 (@ToString, @EqualsAndHashCode)
+				. 빌더 패턴 지원 (@Builder)
+				. 로그 자동 생성 (@Log, @Slf4j)
+		 -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.0</version>
+		</dependency>
+
+
+
+
+		<!-- @Inject -->
+		<!--
+			javax.inject 라이브러리
+				- 의존성 주입(Dependency Injection, DI)을 위한 표준 API를 제공
+				- @Inject, @Named, @Singleton 등 제공
+		 -->
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
+		</dependency>
+
+		<!-- Servlet -->
+		<!--
+		  javax.servlet-api (Servlet API)
+			-  Java Servlet을 구현하는 데 필요한 클래스와 인터페이스를 제공
+		 -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!--
+		  javax.servlet.jsp-api (JSP API)
+			- JSP(JavaServer Pages)를 구현하는 데 필요한 API를 제공
+		 -->
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>javax.servlet.jsp-api</artifactId>
+			<version>2.3.3</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!--
+		   javax.servlet.jstl (JSTL API)
+			  - JSTL(JavaServer Pages Standard Tag Library)은 JSP에서 표준 태그 라이브러리를 제공
+		 -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version>  <!-- Tomcat 10 이상이라면 3.0.0 사용 -->
+		</dependency>
+
+		<!-- mysql데이터베이스 -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.33</version> <!-- 버전은 최신으로 -->
+		</dependency>
+		<!-- dataSource Pool -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-dbcp2</artifactId>
+			<version>2.9.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-pool2</artifactId>
+			<version>2.11.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.4</version>
+		</dependency>
+
+
+
+
+
+
+		<!-- Jackson (JSON 파싱/생성용, 선택) -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.13.0</version>
+		</dependency>
+
+		<!-- Stripe Java SDK (Checkout 세션 생성용) -->
+		<dependency>
+			<groupId>com.stripe</groupId>
+			<artifactId>stripe-java</artifactId>
+			<version>24.9.0</version>
+		</dependency>
+
+		<!-- AOP -->
+
+		<!-- Test -->
+		<!--
+		  JUnit
+		   - Java 애플리케이션에서 단위 테스트를 수행하는 데 사용되는 오픈 소스 테스트 프레임워크
+		   - 개발자가 개별 코드 단위를 테스트하여 예상된 결과와 실제 결과가 일치하는지 확인할 수 있도록 지원
+		   - 주요 기능
+				- 자동화된 테스트
+				- 조기 버그 감지
+				- 코드 유지보수성 향상
+				- 간편한 사용: 간단한 테스트 어노테이션과 메서드를 제공
+		 -->
+		<!-- 스프링 테스트 지원 -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${org.springframework-version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<version>2.3.7.RELEASE</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- JUnit 5 -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>5.10.0</version>
+			<scope>test</scope>
+		</dependency>
+
+
+		<!--Redis 설정-->
+		<!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-redis -->
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-redis</artifactId>
+			<version>2.4.3</version>
+		</dependency>
+
+		<!-- Redis 클라이언트 (lettuce 또는 jedis 중 선택) -->
+		<dependency>
+			<groupId>io.lettuce</groupId>
+			<artifactId>lettuce-core</artifactId>
+			<version>6.0.2.RELEASE</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.springframework.batch/spring-batch-core -->
+		<dependency>
+			<groupId>org.springframework.batch</groupId>
+			<artifactId>spring-batch-core</artifactId>
+			<version>4.3.3</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework.batch/spring-batch-test -->
+		<dependency>
+			<groupId>org.springframework.batch</groupId>
+			<artifactId>spring-batch-test</artifactId>
+			<version>4.3.3</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+
+
+	<!-- build: 프로젝트의 빌드 설정을 정의하는 영역 , 컴파일러 설정, 실행 환경, 패키징 방식 등을 지정
+		                 개발단계에서는 생략가능,   빌드 시 필요한 주요 역할
+					- 컴파일 (maven-compiler-plugin)
+					- 소스 코드를 컴파일하여 .class 파일을 생성.
+					- 패키징 (maven-jar-plugin, maven-war-plugin)
+					- .jar 또는 .war 파일을 생성하여 서버에 배포할 수 있도록 지원.
+					- 의존성 관리 (maven-dependency-plugin)
+					- 필요한 라이브러리를 자동으로 다운로드하고 패키징 과정에서 포함.
+					- 테스트 (maven-surefire-plugin)
+					- 빌드 과정에서 자동으로 테스트를 실행하여 코드 안정성을 검증.
+				등의 역할을 한다
+	 -->
+
+	 <build>
+	    <plugins>
+	        <plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-compiler-plugin</artifactId>
+	            <version>3.8.1</version>
+	            <configuration>
+	                <source>11</source>  <!-- Java 11 버전 지정 -->
+	                <target>11</target>
+	            </configuration>
+	        </plugin>
+	        <plugin>
+            	<groupId>org.apache.maven.plugins</groupId>
+            	<artifactId>maven-war-plugin</artifactId>
+            	<version>3.3.2</version> <!-- 또는 4.1.3 등 최신 버전 사용 -->
+          	</plugin>
+          	
+<!--          	&lt;!&ndash; Tomcat 플러그인 추가 - 내장 서버로 실행 가능 &ndash;&gt;-->
+<!--          	<plugin>-->
+<!--                <groupId>org.apache.tomcat.maven</groupId>-->
+<!--                <artifactId>tomcat7-maven-plugin</artifactId>-->
+<!--                <version>2.2</version>-->
+<!--                <configuration>-->
+<!--                    <port>8080</port>-->
+<!--                    <path>/nafal</path>-->
+<!--                    <uriEncoding>UTF-8</uriEncoding>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+	    </plugins>
+
+	</build>
+
+</project>
+

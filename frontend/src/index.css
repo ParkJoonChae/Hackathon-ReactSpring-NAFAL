@@ -1,0 +1,19 @@
+/* NAFAL - KREAM Style Application Styles */
+
+/* Import Design System */
+@import './styles/tokens.css';
+@import './styles/components.css';
+
+/* Additional global styles if needed */
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+code {
+  font-family: var(--font-mono);
+}

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<!-- DB설정 properties로드 -->
+	<!-- <properties resource="/config/database.properties" /> -->
+
+
+
+	<typeAliases>
+      	<typeAlias alias="insertProduct" type="com.spring.project.dto.ProductDTO"/>
+      	<typeAlias alias="insertAuctions" type="com.spring.project.dto.AuctionsDTO"/>
+      	<typeAlias alias="insertProductImages" type="com.spring.project.dto.ImgDTO"/>
+      	<typeAlias alias="insertCategory" type="com.spring.project.dto.CategoryDTO"/>
+      	<typeAlias alias="AdminDashboard" type="com.spring.project.dto.AdminDashboard"/>
+		<typeAlias alias="user" type="com.spring.project.dto.UserDTO"/>
+      	<typeAlias alias="ServerToProductDTO" type="com.spring.project.dto.ServerToProductDTO"/>
+		<typeAlias alias="wallet" type="com.spring.project.dto.WalletDTO"/>
+		<typeAlias alias="wallet" type="com.spring.project.dto.WalletDTO"/>
+	</typeAliases>
+
+	<typeHandlers>
+		<typeHandler handler="org.apache.ibatis.type.LocalDateTimeTypeHandler" javaType="java.time.LocalDateTime"/>
+	</typeHandlers>
+	
+	<!-- root-context.xml에 연동 된 DB작업 -->
+<!-- 	<environments default="development1">
+		<environment id="development1">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED" >
+				<property name="driver" 	      value="${jdbc.driver}"  />
+    	  	    <property name="url"              value="${jdbc.url}"/>
+      		    <property name="username"         value="${jdbc.username}" />
+       		    <property name="password"         value="${jdbc.password}" />
+			</dataSource>
+		</environment>
+	</environments> -->
+	
+	
+	<!-- mybatis mapper생성 지점 -->
+	<mappers>
+		<mapper resource="mapper/user_mapper.xml" />
+		<mapper resource="mapper/product_mapper.xml" />
+		<mapper resource="mapper/wallet_mapper.xml" />
+
+	</mappers>
+	
+</configuration>
+

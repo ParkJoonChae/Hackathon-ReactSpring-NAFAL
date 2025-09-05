@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="userRepository">
+   <insert id="insertManager" parameterType="user">
+      insert into Users(name,username,passwordHash,phoneNumber,userType,recentAt)
+      value(#{name},#{username},#{passwordHash},#{phoneNumber},#{userType},#{recentAt})
+   </insert>
+
+   <update id="updateEntryUserAt" parameterType="list">
+      update users set recentAt = #{entryTime} where userId =#{userId};
+   </update>
+
+   <!-- 로그인 -->
+   <select id="login" resultType="user">
+      SELECT
+         userId,
+         username,
+         passwordHash,
+         name,
+         phoneNumber,
+         pointBalance,
+         userType,
+         canBid,
+         createdAt,
+         recentAt
+      FROM Users
+      WHERE username = #{username}
+        AND passwordHash = #{passwordHash}
+   </select>
+
+   <!--회원 가입 후 알림 등록-->
+   <insert id="notification_signup" parameterType="map">
+      insert into notifications(type,type_id) values(#{type},#{id})
+   </insert>
+
+   <!-- 회원가입 -->
+   <insert id="signup" parameterType="user" useGeneratedKeys="true" keyProperty="userId">
+      INSERT INTO Users
+         (username, passwordHash, name, phoneNumber,createdAt)
+      VALUES
+         (#{username}, #{passwordHash}, #{name}, #{phoneNumber},#{createdAt})
+   </insert>
+
+   <!-- ID 중복 확인 -->
+   <select id="checkId" parameterType="string" resultType="int">
+      SELECT COUNT(*) FROM Users WHERE username = #{username}
+   </select>
+
+   <!-- 전화번호 중복 확인 -->
+   <select id="checkPhoneNumber" parameterType="string" resultType="int">
+      SELECT COUNT(*) FROM Users WHERE phoneNumber = #{phoneNumber}
+   </select>
+
+   <!-- username으로만 조회 (카카오 첫 로그인 판단용) -->
+   <select id="findByUsername" parameterType="string" resultType="user">
+      SELECT userId, username, passwordHash, name, phoneNumber, pointBalance, userType, canBid, createdAt,recentAt
+      FROM Users
+      WHERE username = #{username}
+   </select>
+
+   <!-- 소셜 신규 가입 (ENUM 매핑 안정화를 위해 userType에 jdbcType 지정) -->
+   <insert id="signupSocial" parameterType="user" useGeneratedKeys="true" keyProperty="userId">
+      INSERT INTO Users (username, passwordHash, name, phoneNumber, userType)
+      VALUES (#{username}, #{passwordHash}, #{name}, #{phoneNumber}, #{userType, jdbcType=VARCHAR})
+   </insert>
+
+   <!-- 소셜용 Upsert (MySQL 전용) : username UNIQUE 기준으로 멱등 처리 -->
+   <insert id="signupSocialUpsert" parameterType="user" useGeneratedKeys="true" keyProperty="userId">
+      INSERT INTO Users (username, passwordHash, name, phoneNumber, userType)
+      VALUES (#{username}, #{passwordHash}, #{name}, #{phoneNumber}, #{userType, jdbcType=VARCHAR})
+         ON DUPLICATE KEY UPDATE
+                             -- 신규 값이 있으면 보정, 없으면 기존 유지
+                             name = COALESCE(VALUES(name), name),
+                             phoneNumber = COALESCE(VALUES(phoneNumber), phoneNumber),
+                             userType = COALESCE(VALUES(userType), userType)
+   </insert>
+
+   <!-- 프로필 보정 등 간단 업데이트 -->
+   <update id="updateName" parameterType="map">
+      UPDATE Users SET name = #{name}
+      WHERE userId = #{userId}
+   </update>
+
+   <!-- 이름 + 아이디(이메일) + 전화번호 일치 여부 -->
+   <select id="existsByUsernameAndName" parameterType="map" resultType="int">
+      SELECT EXISTS (
+         SELECT 1
+         FROM Users
+         WHERE username = #{username}
+           AND name     = #{name}
+      )
+   </select>
+
+   <!-- 비밀번호 해시 업데이트 -->
+   <update id="updatePasswordByUsername" parameterType="map">
+      UPDATE users
+      SET passwordHash = #{passwordHash}
+      WHERE username   = #{username}
+   </update>
+
+   <!-- 전체 사용자 수 -->
+   <select id="countAllUsers" resultType="int">
+      SELECT COUNT(*) FROM Users
+   </select>
+
+   <!-- 역할별 사용자 수 (ADMIN / USER) -->
+   <select id="countByRole" parameterType="string" resultType="int">
+      SELECT COUNT(*)
+      FROM Users
+      WHERE userType = #{role}
+   </select>
+
+   <!-- 포인트 거래 내역 조회 -->
+   <select id="getPointTransactions" parameterType="int" resultType="map">
+      SELECT txId, userId, amount, type, createdAt
+      FROM PointTransactions
+      WHERE userId = #{userId}
+      ORDER BY createdAt DESC
+      LIMIT 10
+   </select>
+
+   <!-- 본인인증 완료 시 canBid 업데이트 -->
+   <update id="updateUserCanBid" parameterType="map">
+      UPDATE Users 
+      SET canBid = #{canBid}, recentAt = CURRENT_TIMESTAMP
+      WHERE userId = #{userId}
+   </update>
+
+
+</mapper>

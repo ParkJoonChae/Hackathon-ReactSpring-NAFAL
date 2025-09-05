@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.spring.project.repository.ProductRepository">
+
+    <insert id="insertProduct" parameterType="insertProduct">
+        INSERT INTO Products(productId,sellerId,title,description,categoryId,co2EffectKg,effectDesc,sizeInfo,history,brand,product_status,ori_price,instantPrice,meterial,tag,eventName,deliveryType,deliveryPrice,deliveryOpt)
+        VALUES(CONCAT('NAFAL-',LPAD(#{productId},4,'0')),#{sellerId},#{title},#{description},#{categoryId},#{co2EffectKg},#{effectDesc},#{sizeInfo},
+        #{history},#{brand},#{itemStatus},#{ori_price},#{instantPrice},#{material},#{tag},#{eventName},#{deliveryType},#{deliveryPrice},#{deliveryOpt});
+
+        <selectKey keyProperty="productId" resultType="String" order="AFTER">
+            select productId from products ORDER BY productId DESC
+            LIMIT 1
+        </selectKey>
+    </insert>
+
+    <insert id="seq_insert" useGeneratedKeys="true" keyProperty="productId">
+        insert into sequence_product value(null);
+    </insert>
+
+    <insert id="insertAuctions" parameterType="insertAuctions">
+            insert into Auctions(productId,instantPrice,startPrice,auctionStart,auctionEnd,status,minimunPrice)
+        value(#{productId},#{instantPrice},#{startPrice},#{auctionStart},#{auctionEnd},#{auctionsStatus},#{minimunPrice})
+
+    </insert>
+
+    <insert id="insertProductImages" parameterType="insertProductImages">
+        insert into ProductImages(productId,thumbnailUrl,image1Url,photoSource) value(#{productId},#{thumbnailUrl},#{imageUrl},#{photoSource})
+    </insert>
+
+    <insert id="insertCategory" parameterType="insertCategory" keyProperty="categoryId" useGeneratedKeys="true">
+        insert into Categories(name,icon) value(#{categoryName},#{icon})
+    </insert>
+
+    <select id="adminDashboard" resultType="AdminDashboard">
+        select * from dashboard
+    </select>
+
+    <!--결제 시 상태 변화 (기존 메서드용)-->
+    <update id="updateOrderStatusPaid" parameterType="String">
+        update Orders set status = 'paid' where orderId = #{orderId}
+    </update>
+    
+    
+    <select id="getProductAll" resultType="ServerToProductDTO">
+        select im.image1Url as imgUrl,p.productId,p.product_status as productStatus,p.title,ac.status as auctionStatus,ori_price as price, categoryId as cate_id from products p
+        join ProductImages im on im.productId = p.productId
+        join auctions ac on ac.productId = p.productId
+        where im.thumbnailUrl = 0
+    </select>
+
+    <select id="getCategory" resultType="insertCategory">
+        select c.categoryId, c.name, count(p.categoryId) as itemCount, c.icon as icon 
+        from categories c 
+        left join products p on c.categoryId = p.categoryId 
+        group by c.categoryId, c.name, c.icon;
+    </select>
+
+    <!-- 경매 상품 상세 정보 조회 -->
+    <select id="getAuctionProductsWithDetails" resultType="map">
+        SELECT 
+            p.productId,
+            p.title,
+            p.description,
+            p.brand,
+            p.product_status as productCondition,
+            p.ori_price,
+            p.instantPrice,
+            p.tag,
+            p.eventName,
+            p.meterial,
+            p.co2EffectKg,
+            p.effectDesc,
+            p.sizeInfo,
+            p.history,
+            p.registerDate,
+            c.categoryId,
+            c.name as category,
+            c.icon as categoryIcon,
+            a.auctionStart,
+            a.auctionEnd,
+            a.status as auctionStatus,
+            a.minimunPrice,
+            a.startPrice,
+            a.bidUnit,
+            COALESCE(pi.image1Url, '/items/default.png') as image,
+            COALESCE(bid_count.count, 0) as bidCount,
+            COALESCE(max_bid.bidAmount, p.ori_price) as currentPrice
+        FROM Products p
+        JOIN Categories c ON p.categoryId = c.categoryId
+        JOIN Auctions a ON p.productId = a.productId
+        LEFT JOIN ProductImages pi ON p.productId = pi.productId AND pi.thumbnailUrl = 1
+                        LEFT JOIN (
+                    SELECT productId, COUNT(*) as count
+                    FROM Bids
+                    GROUP BY productId
+                ) bid_count ON p.productId = bid_count.productId
+                LEFT JOIN (
+                    SELECT productId, MAX(bidAmount) as bidAmount
+                    FROM Bids
+                    GROUP BY productId
+                ) max_bid ON p.productId = max_bid.productId
+        ORDER BY a.auctionEnd ASC
+    </select>
+
+    <!-- 상품 기본 정보 조회 -->
+    <select id="getProductInfo" parameterType="string" resultType="map">
+        SELECT 
+            p.productId,
+            p.title,
+            p.description,
+            p.brand,
+            p.product_status as productCondition,
+            p.ori_price,
+            p.instantPrice,
+            p.tag,
+            p.eventName,
+            p.meterial,
+            p.co2EffectKg,
+            p.effectDesc,
+            p.sizeInfo,
+            p.history,
+            p.registerDate,
+            c.name as category,
+            COALESCE(pi.image1Url, '/items/default.png') as image
+        FROM Products p
+        LEFT JOIN Categories c ON p.categoryId = c.categoryId
+        LEFT JOIN ProductImages pi ON p.productId = pi.productId AND pi.thumbnailUrl = 1
+        WHERE p.productId = #{productId}
+    </select>
+
+    <!-- 경매 상태 조회: 초기 Redis 상태 미존재 시 seed 용 -->
+    <select id="selectAuctionStateByProductId" parameterType="string" resultType="map">
+        SELECT
+            p.productId,
+            p.title,
+            p.instantPrice AS productInstantPrice,
+            a.instantPrice AS auctionInstantPrice,
+            a.minimunPrice,
+            COALESCE(a.bidUnit, 1000) AS bidUnit,
+            a.auctionStart,
+            a.auctionEnd,
+            a.status
+        FROM Products p
+        JOIN Auctions a ON p.productId = a.productId
+        WHERE p.productId = #{productId}
+    </select>
+
+    <select id="selectAuctionMetaByProductId" parameterType="string" resultType="map">
+        select instantPrice, minimunPrice, startPrice, auctionStart, auctionEnd, status, softCloseSeconds
+        from Auctions
+        where productId = #{productId}
+    </select>
+
+    <select id="selectRecentBidsByProductId" parameterType="map" resultType="map">
+        select bidId, productId, userId, bidAmount, bidTime, isAutoBid
+        from Bids
+        where productId = #{productId}
+        order by bidTime desc
+        limit #{limit}
+    </select>
+
+    <!-- 최고 입찰자 조회 (낙찰자용) -->
+    <select id="selectTopBidderByProductId" parameterType="string" resultType="map">
+        select bidId, productId, userId, bidAmount, bidTime, isAutoBid
+        from Bids
+        where productId = #{productId}
+        order by bidAmount desc, bidTime asc
+        limit 1
+    </select>
+
+    <!-- 입찰 정보 저장 -->
+    <insert id="insertBid" parameterType="map">
+        INSERT INTO Bids(productId, userId, bidAmount, bidTime, isAutoBid)
+        VALUES(#{productId}, #{userId}, #{bidAmount}, NOW(), false)
+    </insert>
+
+    <!-- 낙찰 주문 생성 -->
+    <insert id="insertOrder" parameterType="map" useGeneratedKeys="true" keyProperty="orderId">
+        INSERT INTO Orders(productId, buyerId, sellerId, status, orderTotal, feeAmount)
+        VALUES(#{productId}, #{buyerId}, #{sellerId}, 'pending', #{orderTotal}, #{feeAmount})
+    </insert>
+
+    <!-- 상품의 판매자 조회 -->
+    <select id="selectSellerByProductId" parameterType="string" resultType="int">
+        SELECT sellerId FROM Products WHERE productId = #{productId}
+    </select>
+
+    <!-- 주문 정보 조회 (상품 정보 포함) -->
+    <select id="selectOrderWithProductInfo" parameterType="int" resultType="map">
+        SELECT 
+            o.orderId,
+            o.productId,
+            o.buyerId,
+            o.sellerId,
+            o.status,
+            o.orderTotal,
+            o.feeAmount,
+            o.createdAt,
+            p.title as productName,
+            p.brand,
+            p.product_status as productCondition,
+            p.meterial as material,
+            p.co2EffectKg,
+            p.deliveryPrice as shippingFee
+        FROM Orders o
+        JOIN Products p ON o.productId = p.productId
+        WHERE o.orderId = #{orderId}
+    </select>
+
+    <!-- productId와 userId로 주문 조회 (상품 정보 포함) -->
+    <select id="selectOrderByProductAndUser" parameterType="map" resultType="map">
+        SELECT 
+            o.orderId,
+            o.productId,
+            o.buyerId,
+            o.sellerId,
+            o.status,
+            o.orderTotal,
+            o.feeAmount,
+            o.createdAt,
+            o.updatedAt,
+            p.title as productName,
+            p.brand,
+            p.product_status as productCondition,
+            p.meterial as material,
+            p.co2EffectKg,
+            p.deliveryPrice as shippingFee
+        FROM Orders o
+        JOIN Products p ON o.productId = p.productId
+        WHERE o.productId = #{productId} 
+          AND o.buyerId = #{userId}
+        ORDER BY o.createdAt DESC
+        LIMIT 1
+    </select>
+
+    <!-- 주문 상태 업데이트 -->
+    <update id="updateOrderStatus" parameterType="map">
+        UPDATE Orders 
+        SET status = #{status}, updatedAt = NOW()
+        WHERE orderId = #{orderId}
+    </update>
+
+    <!-- 경매 상태 업데이트 (Redis-DB 동기화용) -->
+    <update id="updateAuctionStatus" parameterType="map">
+        UPDATE Auctions 
+        SET status = #{status}
+        WHERE productId = #{productId}
+    </update>
+
+    <!-- 경매 종료 시간 업데이트 (Redis-DB 동기화용) -->
+    <update id="updateAuctionEndTime" parameterType="map">
+        UPDATE Auctions 
+        SET auctionEnd = FROM_UNIXTIME(#{endTime}/1000)
+        WHERE productId = #{productId}
+    </update>
+
+</mapper>
