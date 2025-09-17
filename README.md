@@ -37,6 +37,7 @@
 
 # 주요기능 
 
+<img width="1023" height="547" alt="image" src="https://github.com/user-attachments/assets/a72c443c-a9f3-4d0c-b998-74f1cdfaabd2" />
 
 
 
